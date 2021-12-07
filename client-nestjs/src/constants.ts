@@ -1,0 +1,2 @@
+
+export const SSO_CONFIG_OPTIONS = "SSO_CONFIG_OPTIONS"
