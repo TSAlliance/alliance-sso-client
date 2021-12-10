@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Inject, Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common";
 import axios, { AxiosError } from "axios";
 import { SSO_CONFIG_OPTIONS } from "../constants";
 import { SSOCreateAuthenticationDTO } from "../dto/create-authentication.dto";
@@ -160,10 +160,41 @@ export class SSOService {
     }
 
     /**
+     * Handle errors during sso requests.
+     * @param error Error object
+     */
+     private async parseError(error: AxiosError): Promise<Error> {
+        // TODO: Parse error
+        if(error.isAxiosError) {
+            const message = error.response?.data["message"] || error.response?.statusText || error.message;
+            if(error.response.status == 403) {
+                return new ForbiddenException(message);
+            } else if(error.response.status == 404) {
+                return new NotFoundException(message);
+            } else if(error.response.status == 400) {
+                return new BadRequestException(message);
+            }
+        } else {
+            return new InternalServerErrorException("Internal server error");
+        }
+    }
+
+    /**
      * Get the current account of the app.
      */
     public get currentAccount(): SSOAppAccount {
         return this._currentAccount;
+    }
+
+    /**
+     * Request access token with provided grantCode.
+     * @param createAuthorizationDto 
+     * @returns SSOAccessToken
+     */
+    public async authorize(createAuthorizationDto: SSOCreateAuthorizationDTO): Promise<SSOAccessToken> {
+        return axios.post<SSOAccessToken>(`${this.options.baseUrl}/authentication/authorize`, createAuthorizationDto).then((response) => response.data).catch((reason) => {
+            throw this.parseError(reason);
+        })
     }
 
 }

@@ -1,5 +1,6 @@
 import { Module, DynamicModule } from '@nestjs/common';
 import { SSO_CONFIG_OPTIONS } from './constants';
+import { SSOController } from './controller/sso.controller';
 import { SSOService } from './service/sso.service';
 
 export class SSOConfigOptions {
@@ -40,6 +41,9 @@ export class SSOConfigOptions {
 @Module({
     providers: [
         SSOService
+    ],
+    controllers: [
+        SSOController
     ]
 })
 export class SSOModule {
@@ -56,6 +60,9 @@ export class SSOModule {
             ],
             exports: [
                 SSOService
+            ],
+            controllers: [
+                SSOController
             ]
         }
     }
