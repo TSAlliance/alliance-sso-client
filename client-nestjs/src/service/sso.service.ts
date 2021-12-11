@@ -163,7 +163,7 @@ export class SSOService {
      * Handle errors during sso requests.
      * @param error Error object
      */
-     private async parseError(error: AxiosError): Promise<Error> {
+     private parseError(error: AxiosError): Error {
         // TODO: Parse error
         if(error.isAxiosError) {
             const message = error.response?.data["message"] || error.response?.statusText || error.message;
@@ -171,7 +171,7 @@ export class SSOService {
                 return new ForbiddenException(message);
             } else if(error.response.status == 404) {
                 return new NotFoundException(message);
-            } else if(error.response.status == 400) {
+            } else {
                 return new BadRequestException(message);
             }
         } else {
@@ -193,8 +193,8 @@ export class SSOService {
      */
     public async authorize(createAuthorizationDto: SSOCreateAuthorizationDTO): Promise<SSOAccessToken> {
         return axios.post<SSOAccessToken>(`${this.options.baseUrl}/authentication/authorize`, createAuthorizationDto).then((response) => response.data).catch((reason) => {
-            throw this.parseError(reason);
-        })
+            throw this.parseError(reason)
+        });
     }
 
 }

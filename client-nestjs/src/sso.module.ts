@@ -49,6 +49,9 @@ export class SSOConfigOptions {
 export class SSOModule {
 
     public static forRoot(options: SSOConfigOptions): DynamicModule {
+        if(options.baseUrl && options.baseUrl.endsWith("/")) {
+            options.baseUrl = options.baseUrl.slice(0, options.baseUrl.length - 1);
+        }
         return {
             module: SSOModule,
             providers: [
