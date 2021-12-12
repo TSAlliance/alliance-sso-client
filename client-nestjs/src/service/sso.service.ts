@@ -4,7 +4,7 @@ import { SSO_CONFIG_OPTIONS } from "../constants";
 import { SSOCreateAuthenticationDTO } from "../dto/create-authentication.dto";
 import { SSOCreateAuthorizationDTO } from "../dto/create-authorization.dto";
 import { SSOAccessToken } from "../entities/sso-access-token.entity";
-import { AccountType, SSOAppAccount } from "../entities/sso-account.entity";
+import { AccountType, SSOAppAccount, SSOUser } from "../entities/sso-account.entity";
 import { SSOGrantCode } from "../entities/sso-grant-code.entity";
 import { SSOConfigOptions } from "../sso.module";
 
@@ -195,6 +195,22 @@ export class SSOService {
         return axios.post<SSOAccessToken>(`${this.options.baseUrl}/authentication/authorize`, createAuthorizationDto).then((response) => response.data).catch((reason) => {
             throw this.parseError(reason)
         });
+    }
+
+    /**
+     * Find user's data using the authorization header value.
+     * @param authHeader Value of Authorization header
+     * @returns SSOUser
+     */
+    public async findCurrentUserByHeader(authHeader: string): Promise<SSOUser> {
+        return axios.get<SSOUser>(`${this.options.baseUrl}/users/@me`, { headers: { 'Authorization': authHeader }}).then((response) => {           
+            return {
+                ...response.data,
+                accountType: AccountType.ACCOUNT_USER
+            };
+        }).catch((reason) => {
+            throw this.parseError(reason);
+        })
     }
 
 }
