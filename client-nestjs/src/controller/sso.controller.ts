@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Headers, Post } from "@nestjs/common";
-import { SSOAccessToken, SSOCreateAuthorizationDTO, SSOUser } from "..";
+import { SSOAccessToken, SSOCreateAuthorizationDTO } from "..";
+import { SSOUser } from "../entities/sso-user.entity";
 import { SSOService } from "../service/sso.service";
 
 

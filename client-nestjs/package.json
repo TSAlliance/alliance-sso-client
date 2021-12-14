@@ -1,6 +1,6 @@
 {
   "name": "@tsalliance/sso-nest",
-  "version": "1.0.19",
+  "version": "1.0.26",
   "description": "",
   "main": "dist/index",
   "scripts": {
@@ -10,7 +10,9 @@
   "dependencies": {
     "@nestjs/common": "^8.0.0",
     "@nestjs/core": "^8.0.0",
-    "axios": "^0.24.0"
+    "axios": "^0.24.0",
+    "typeorm": "^0.2.41",
+    "@nestjs/typeorm": "^8.0.2"
   },
   "devDependencies": {
     "@types/axios": "^0.14.0",
@@ -19,7 +21,8 @@
   },
   "peerDependencies": {
     "@nestjs/common": "^8.0.0",
-    "@nestjs/core": "^8.0.0"
+    "@nestjs/core": "^8.0.0",
+    "@nestjs/typeorm": "^8.0.2"
   },
   "author": "",
   "license": "ISC",

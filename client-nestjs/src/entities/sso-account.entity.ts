@@ -5,16 +5,6 @@ export enum AccountType {
     ACCOUNT_APP = "account_service"
 }
 
-export class SSOUser {
-    public id: string;
-    public username: string;
-    public email: string;
-    public accountType: AccountType = AccountType.ACCOUNT_USER;
-    
-    // TODO: SSORole object
-    public role: any;
-}
-
 export class SSOAppAccount {
 
     /**

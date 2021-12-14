@@ -4,8 +4,9 @@ import { SSO_CONFIG_OPTIONS } from "../constants";
 import { SSOCreateAuthenticationDTO } from "../dto/create-authentication.dto";
 import { SSOCreateAuthorizationDTO } from "../dto/create-authorization.dto";
 import { SSOAccessToken } from "../entities/sso-access-token.entity";
-import { AccountType, SSOAppAccount, SSOUser } from "../entities/sso-account.entity";
+import { AccountType, SSOAppAccount } from "../entities/sso-account.entity";
 import { SSOGrantCode } from "../entities/sso-grant-code.entity";
+import { SSOUser } from "../entities/sso-user.entity";
 import { SSOConfigOptions } from "../sso.module";
 
 @Injectable()

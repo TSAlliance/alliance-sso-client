@@ -1,6 +1,8 @@
 import { Module, DynamicModule } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { SSO_CONFIG_OPTIONS } from './constants';
 import { SSOController } from './controller/sso.controller';
+import { SSOUserRepository } from './repositories/sso-user.repository';
 import { SSOService } from './service/sso.service';
 
 export class SSOConfigOptions {
@@ -44,6 +46,11 @@ export class SSOConfigOptions {
     ],
     controllers: [
         SSOController
+    ],
+    imports: [
+        TypeOrmModule.forFeature([
+            SSOUserRepository
+        ])
     ]
 })
 export class SSOModule {
@@ -66,6 +73,11 @@ export class SSOModule {
             ],
             controllers: [
                 SSOController
+            ],
+            imports: [
+                TypeOrmModule.forFeature([
+                    SSOUserRepository
+                ])
             ]
         }
     }
