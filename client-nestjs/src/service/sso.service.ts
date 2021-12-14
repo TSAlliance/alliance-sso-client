@@ -7,6 +7,7 @@ import { SSOAccessToken } from "../entities/sso-access-token.entity";
 import { AccountType, SSOAppAccount } from "../entities/sso-account.entity";
 import { SSOGrantCode } from "../entities/sso-grant-code.entity";
 import { SSOUser } from "../entities/sso-user.entity";
+import { SSOUserRepository } from "../repositories/sso-user.repository";
 import { SSOConfigOptions } from "../sso.module";
 
 @Injectable()
@@ -20,7 +21,10 @@ export class SSOService {
 
     private _retryInterval: any;
 
-    constructor(@Inject(SSO_CONFIG_OPTIONS) private options: SSOConfigOptions) {
+    constructor(
+        @Inject(SSO_CONFIG_OPTIONS) private options: SSOConfigOptions, 
+        private userRepository: SSOUserRepository
+    ) {
         this.logger.log(`Authenticating app with credentials at '${options.baseUrl}'`);
 
         this.authenticateApp().then(async (success) => {
@@ -193,22 +197,30 @@ export class SSOService {
      * @returns SSOAccessToken
      */
     public async authorize(createAuthorizationDto: SSOCreateAuthorizationDTO): Promise<SSOAccessToken> {
-        return axios.post<SSOAccessToken>(`${this.options.baseUrl}/authentication/authorize`, createAuthorizationDto).then((response) => response.data).catch((reason) => {
+        return axios.post<SSOAccessToken>(`${this.options.baseUrl}/authentication/authorize`, createAuthorizationDto).then((response) => {
+            return response.data
+        }).catch((reason) => {
             throw this.parseError(reason)
         });
     }
 
     /**
-     * Find user's data using the authorization header value.
+     * Find user's data using the authorization header value. The user's fetched id is stored in the database for future relations with soundcore specific data.
      * @param authHeader Value of Authorization header
      * @returns SSOUser
      */
     public async findCurrentUserByHeader(authHeader: string): Promise<SSOUser> {
-        return axios.get<SSOUser>(`${this.options.baseUrl}/users/@me`, { headers: { 'Authorization': authHeader }}).then((response) => {           
-            return {
+        return axios.get<SSOUser>(`${this.options.baseUrl}/users/@me`, { headers: { 'Authorization': authHeader }}).then((response) => { 
+            const data: SSOUser = {
                 ...response.data,
                 accountType: AccountType.ACCOUNT_USER
-            };
+            }
+
+            return this.userRepository.save(data).then(() => {
+                return data;
+            }).catch((reason) => {
+                throw this.parseError(reason);
+            })
         }).catch((reason) => {
             throw this.parseError(reason);
         })

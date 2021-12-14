@@ -41,16 +41,8 @@ export class SSOConfigOptions {
 }
 
 @Module({
-    providers: [
-        SSOService
-    ],
     controllers: [
         SSOController
-    ],
-    imports: [
-        TypeOrmModule.forFeature([
-            SSOUserRepository
-        ])
     ]
 })
 export class SSOModule {
@@ -75,9 +67,7 @@ export class SSOModule {
                 SSOController
             ],
             imports: [
-                TypeOrmModule.forFeature([
-                    SSOUserRepository
-                ])
+                TypeOrmModule.forFeature([ SSOUserRepository ])
             ]
         }
     }
