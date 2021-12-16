@@ -38,6 +38,11 @@ export class SSOConfigOptions {
      * Defaults to -1, meaning infinite.
      */
     public retries?: number = -1;
+
+    /**
+     * Enable or disabled debug logs.
+     */
+    public logging?: boolean = false;
 }
 
 @Module({

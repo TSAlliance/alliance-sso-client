@@ -169,8 +169,8 @@ export class SSOService {
      * @param error Error object
      */
      private parseError(error: AxiosError): Error {
-        // TODO: Parse error
         if(error.isAxiosError) {
+            if(this.options.logging) this.logger.error(error.response)
             const message = error.response?.data["message"] || error.response?.statusText || error.message;
             if(error.response.status == 403) {
                 return new ForbiddenException(message);
@@ -180,6 +180,8 @@ export class SSOService {
                 return new BadRequestException(message);
             }
         } else {
+            if(this.options.logging) this.logger.error(error)
+        
             return new InternalServerErrorException("Internal server error");
         }
     }
@@ -210,6 +212,10 @@ export class SSOService {
      * @returns SSOUser
      */
     public async findCurrentUserByHeader(authHeader: string): Promise<SSOUser> {
+        if(!authHeader) {
+            throw new BadRequestException("Invalid auth header: undefined")
+        }
+
         return axios.get<SSOUser>(`${this.options.baseUrl}/users/@me`, { headers: { 'Authorization': authHeader }}).then((response) => { 
             const data: SSOUser = {
                 ...response.data,
