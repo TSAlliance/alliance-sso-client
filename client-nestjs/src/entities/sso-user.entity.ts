@@ -1,4 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { SSORole } from "..";
 import { AccountType } from "./sso-account.entity";
 
 @Entity()
@@ -11,6 +12,5 @@ export class SSOUser {
     public email: string;
     public accountType: AccountType = AccountType.ACCOUNT_USER;
     
-    // TODO: SSORole object
-    public role: any;
+    public role: SSORole;
 }

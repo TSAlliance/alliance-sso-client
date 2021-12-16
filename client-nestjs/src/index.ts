@@ -7,5 +7,7 @@ export * from "./entities/sso-account.entity";
 export * from "./entities/sso-access-token.entity";
 export * from "./entities/sso-grant-code.entity";
 export * from "./entities/sso-user.entity";
+export * from "./entities/sso-role.entity";
 
 export * from "./repositories/sso-user.repository";
+export * from "./service/sso.service";
