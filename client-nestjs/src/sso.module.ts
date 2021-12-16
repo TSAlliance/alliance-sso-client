@@ -1,7 +1,9 @@
 import { Module, DynamicModule } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SSO_CONFIG_OPTIONS } from './constants';
 import { SSOController } from './controller/sso.controller';
+import { SSOAuthenticationGuard } from './guards/authentication.guard';
 import { SSOUserRepository } from './repositories/sso-user.repository';
 import { SSOService } from './service/sso.service';
 
@@ -62,6 +64,10 @@ export class SSOModule {
                 {
                     provide: SSO_CONFIG_OPTIONS,
                     useValue: options
+                },
+                {
+                    provide: APP_GUARD,
+                    useClass: SSOAuthenticationGuard,
                 },
                 SSOService
             ],
