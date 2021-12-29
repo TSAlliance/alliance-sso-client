@@ -1,9 +1,9 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
-import { SSORole } from "..";
-import { AccountType } from "./sso-account.entity";
+import { Entity, PrimaryGeneratedColumn } from "typeorm";
+import { AccountType, SSOAccount } from "./sso-account.entity";
+import { SSORole } from "./sso-role.entity";
 
 @Entity()
-export class SSOUser {
+export class SSOUser extends SSOAccount {
 
     @PrimaryGeneratedColumn("uuid")
     public id: string;
@@ -13,4 +13,10 @@ export class SSOUser {
     public accountType: AccountType = AccountType.ACCOUNT_USER;
     
     public role: SSORole;
+
+    public hasPermission(permission: string): boolean {
+        if(!this.role) return false;
+        if(this.role.id == "*") return true;
+        return this.role.permissions.includes(permission);
+    }
 }

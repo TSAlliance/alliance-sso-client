@@ -5,7 +5,15 @@ export enum AccountType {
     ACCOUNT_APP = "account_service"
 }
 
-export class SSOAppAccount {
+export abstract class SSOAccount {
+    public abstract hasPermission(permission: string): boolean;
+}
+
+export class SSOAppAccount extends SSOAccount {
+    
+    public hasPermission(permission: string): boolean {
+        return true;
+    }
 
     /**
      * Id of the app's account.

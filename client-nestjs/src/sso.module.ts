@@ -1,9 +1,10 @@
-import { Module, DynamicModule } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
+import { Module, DynamicModule, Global } from '@nestjs/common';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SSO_CONFIG_OPTIONS } from './constants';
 import { SSOController } from './controller/sso.controller';
 import { SSOAuthenticationGuard } from './guards/authentication.guard';
+import { SSOResponseInterceptor } from './interceptor/response.interceptor';
 import { SSOUserRepository } from './repositories/sso-user.repository';
 import { SSOService } from './service/sso.service';
 
@@ -47,6 +48,7 @@ export class SSOConfigOptions {
     public logging?: boolean = false;
 }
 
+@Global()
 @Module({
     controllers: [
         SSOController
@@ -68,6 +70,10 @@ export class SSOModule {
                 {
                     provide: APP_GUARD,
                     useClass: SSOAuthenticationGuard,
+                },
+                {
+                    provide: APP_INTERCEPTOR,
+                    useClass: SSOResponseInterceptor,
                 },
                 SSOService
             ],

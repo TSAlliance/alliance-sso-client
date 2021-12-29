@@ -217,10 +217,10 @@ export class SSOService {
         }
 
         return axios.get<SSOUser>(`${this.options.baseUrl}/users/@me`, { headers: { 'Authorization': authHeader }}).then((response) => { 
-            const data: SSOUser = {
-                ...response.data,
-                accountType: AccountType.ACCOUNT_USER
-            }
+            const data: SSOUser = response.data
+            if(!data) return null;
+
+            data.accountType = AccountType.ACCOUNT_USER;
 
             return this.userRepository.save(data).then(() => {
                 return data;
