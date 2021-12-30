@@ -1,11 +1,11 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Inject, Injectable, Logger, UnauthorizedException } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { Observable } from "rxjs";
-import { SSOConfigOptions } from "..";
 import { PROPERTY_PERMISSION_META_KEY, ROUTE_AUTH_REQUIRED, SSO_CONFIG_OPTIONS } from "../constants";
 import { SSORole } from "../entities/sso-role.entity";
 import { SSOUser } from "../entities/sso-user.entity";
 import { SSOService } from "../service/sso.service";
+import { SSOConfigOptions } from "../sso.module";
 
 @Injectable()
 export class SSOAuthenticationGuard implements CanActivate {
@@ -22,25 +22,22 @@ export class SSOAuthenticationGuard implements CanActivate {
       try {
         const metaValue: string[] | boolean = this.reflector.get<string[] | boolean>(PROPERTY_PERMISSION_META_KEY, ctx.getHandler());
         const requiredPermissions: string[] = [];
+        const routePath = ctx.switchToHttp().getRequest().path
 
         if(this.options.logging) {
-          this.logger.debug("Authentication attempt on route. Route has following access control: ", metaValue);
+          this.logger.debug("Authentication attempt on route " + routePath + ". Route has following access control: ", metaValue);
         }
 
         if(typeof metaValue != "undefined" && metaValue != null) {
           if(typeof metaValue == "boolean") {
             // @CanAccess(false) --> No one can access this route
             if(!metaValue) {
-              if(this.options.logging) this.logger.debug("Route cannot be access from anyone");
+              if(this.options.logging) this.logger.debug("Route " + routePath + " cannot be access from anyone");
               throw new ForbiddenException();
             }
           } else {
             requiredPermissions.push(...metaValue);
           }
-        }
-
-        if(this.options.logging) {
-          this.logger.debug("Authentication attempt on route. Route requires following permissions: ", requiredPermissions);
         }
         
         const isRouteRequiringPermission: boolean = requiredPermissions?.length > 0 || false;
@@ -49,9 +46,19 @@ export class SSOAuthenticationGuard implements CanActivate {
         const hasScopedParams: boolean = this.hasScopeParameter(ctx);
         const isRouteRequiringAuth: boolean = this.reflector.get<boolean>(ROUTE_AUTH_REQUIRED, ctx.getHandler()) || isRouteRequiringPermission || hasScopedParams
 
+        if(this.options.logging) {
+          this.logger.debug("Authentication attempt on route " + routePath + ". Routing guard has following info: ", {
+            isAuthenticatedDecorator: this.reflector.get<boolean>(ROUTE_AUTH_REQUIRED, ctx.getHandler()) || null,
+            routePath,
+            isRouteRequiringAuth,
+            hasScopedParams,
+            isRouteRequiringPermission
+          });
+        }
+
         if(!isRouteRequiringAuth) {
           if(!authHeaderValue) {
-            if(this.options.logging) this.logger.debug("Allowing request: Route requires no access control and request has no auth header. ", requiredPermissions);
+            if(this.options.logging) this.logger.debug("Allowing request: Route " + routePath + " requires no access control and request has no auth header.", requiredPermissions);
             resolve(true)
             return;
           }
@@ -60,8 +67,8 @@ export class SSOAuthenticationGuard implements CanActivate {
         // If no header exists and authentication is needed 
         // ==> throw unauthorized
         if(!authHeaderValue && isRouteRequiringAuth) {
-          if(this.options.logging) this.logger.debug("Denied request: Route requires access control, but request has no auth header. ", requiredPermissions);
-          throw new UnauthorizedException()
+          if(this.options.logging) this.logger.debug("Denied request: Route " + routePath + " requires access control, but request has no auth header. ", requiredPermissions);
+          throw new UnauthorizedException("Route requires authentication.")
         }
 
         // Proceed with authentication and authorization
@@ -82,8 +89,8 @@ export class SSOAuthenticationGuard implements CanActivate {
 
           if(isRouteRequiringAuth){
             if(!hasScopedParams) {
-              if(this.options.logging) this.logger.debug("Denied request: Route requires access control, but the requester did not provide a valid account to authenticate with. ", requiredPermissions);
-              throw new ForbiddenException("Invalid account.");
+              if(this.options.logging) this.logger.debug("Denied request: Route " + routePath + " requires access control, but the requester did not provide a valid account to authenticate with. ", requiredPermissions);
+              throw new UnauthorizedException("Invalid account.");
             }
           } 
           // otherwise continue and resolve at bottom of this inner function
@@ -98,7 +105,7 @@ export class SSOAuthenticationGuard implements CanActivate {
             const permissionGranted = !!requiredPermissions.find((permission) => (account.role as SSORole).permissions.includes(permission));
 
             if(!permissionGranted) {
-              if(this.options.logging) this.logger.debug("Denied request: Missing permissions", requiredPermissions);
+              if(this.options.logging) this.logger.debug("Denied request: Missing permissions on route " + routePath, requiredPermissions);
               throw new ForbiddenException("Insufficient Permission.");
             }
           }
@@ -134,9 +141,6 @@ export class SSOAuthenticationGuard implements CanActivate {
    */
   private hasScopeParameter(ctx: ExecutionContext): boolean {
     const params = ctx.switchToHttp().getRequest().params as Record<string, any>;
-    // console.log(params)
-
-    // console.log("found " +Object.values(params).filter((paramVal: string) => paramVal.includes("@me")).length + " scoped params")
     return Object.values(params).filter((paramVal: string) => paramVal.includes("@me")).length > 0;
   }
 }

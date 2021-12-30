@@ -46,6 +46,11 @@ export class SSOConfigOptions {
      * Enable or disabled debug logs.
      */
     public logging?: boolean = false;
+
+    /**
+     * Enable or disabled built-in guard.
+     */
+     public disableGuard?: boolean = false;
 }
 
 @Global()
@@ -60,25 +65,32 @@ export class SSOModule {
         if(options.baseUrl && options.baseUrl.endsWith("/")) {
             options.baseUrl = options.baseUrl.slice(0, options.baseUrl.length - 1);
         }
+
+        const providers = [
+            {
+                provide: SSO_CONFIG_OPTIONS,
+                useValue: options
+            },
+            {
+                provide: APP_INTERCEPTOR,
+                useClass: SSOResponseInterceptor,
+            },
+            SSOService
+        ]
+
+        if(!options.disableGuard) {
+            providers.push({
+                provide: APP_GUARD,
+                useClass: SSOAuthenticationGuard,
+            } as any)
+        }
+
         return {
             module: SSOModule,
-            providers: [
-                {
-                    provide: SSO_CONFIG_OPTIONS,
-                    useValue: options
-                },
-                {
-                    provide: APP_GUARD,
-                    useClass: SSOAuthenticationGuard,
-                },
-                {
-                    provide: APP_INTERCEPTOR,
-                    useClass: SSOResponseInterceptor,
-                },
-                SSOService
-            ],
+            providers,
             exports: [
-                SSOService
+                SSOService,
+                SSO_CONFIG_OPTIONS
             ],
             controllers: [
                 SSOController

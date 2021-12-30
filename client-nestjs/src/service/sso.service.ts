@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Inject, Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Inject, Injectable, InternalServerErrorException, Logger, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import axios, { AxiosError } from "axios";
 import { SSO_CONFIG_OPTIONS } from "../constants";
 import { SSOCreateAuthenticationDTO } from "../dto/create-authentication.dto";
@@ -172,7 +172,9 @@ export class SSOService {
         if(error.isAxiosError) {
             if(this.options.logging) this.logger.error(error.response)
             const message = error.response?.data["message"] || error.response?.statusText || error.message;
-            if(error.response.status == 403) {
+            if(error.response.status == 401) {
+                return new UnauthorizedException(message);
+            } else if(error.response.status == 403) {
                 return new ForbiddenException(message);
             } else if(error.response.status == 404) {
                 return new NotFoundException(message);
@@ -213,12 +215,14 @@ export class SSOService {
      */
     public async findCurrentUserByHeader(authHeader: string): Promise<SSOUser> {
         if(!authHeader) {
-            throw new BadRequestException("Invalid auth header: undefined")
+            throw new UnauthorizedException("Invalid authentication. header")
         }
 
         return axios.get<SSOUser>(`${this.options.baseUrl}/users/@me`, { headers: { 'Authorization': authHeader }}).then((response) => { 
             const data: SSOUser = response.data
             if(!data) return null;
+            
+            if(this.options.logging) console.log(data)
 
             data.accountType = AccountType.ACCOUNT_USER;
 

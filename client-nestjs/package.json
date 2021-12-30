@@ -1,6 +1,6 @@
 {
   "name": "@tsalliance/sso-nest",
-  "version": "1.0.51",
+  "version": "1.0.58",
   "description": "",
   "main": "dist/index",
   "scripts": {

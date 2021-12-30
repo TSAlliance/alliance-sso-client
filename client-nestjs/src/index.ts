@@ -18,3 +18,5 @@ export * from "./decorators/canAccess.decorator";
 export * from "./decorators/canRead.decorator";
 
 export * from "./interceptor/response.interceptor";
+
+export * from "./constants";
