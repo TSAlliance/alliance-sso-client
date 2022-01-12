@@ -75,7 +75,7 @@ export class SSOAuthenticationGuard implements CanActivate {
         // Even if route does not required authentication, a request
         // is authenticated if a header was found.
         // Decode access token and validate it to retrieve account data
-        const account: SSOUser = await this.authService.findCurrentUserByHeader(authHeaderValue);
+        const account: SSOUser = await this.authService.findUserUsingHeader("@me", authHeaderValue);
 
         // Make authentication object available to future actions in the handler chain
         // The @Authentication param decorator as an example uses this to return the authentication

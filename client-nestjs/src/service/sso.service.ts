@@ -213,18 +213,22 @@ export class SSOService {
      * @param authHeader Value of Authorization header
      * @returns SSOUser
      */
-    public async findCurrentUserByHeader(authHeader: string): Promise<SSOUser> {
+    public async findUserUsingHeader(userId: string, authHeader: string): Promise<SSOUser> {
         if(!authHeader) {
             throw new UnauthorizedException("Invalid authentication. header")
         }
 
-        return axios.get<SSOUser>(`${this.options.baseUrl}/users/@me`, { headers: { 'Authorization': authHeader }}).then((response) => { 
+        return axios.get<SSOUser>(`${this.options.baseUrl}/users/${userId}`, { headers: { 'Authorization': authHeader }}).then((response) => { 
             const data: SSOUser = response.data
             if(!data) return null;
             
             if(this.options.logging) console.log(data)
 
             data.accountType = AccountType.ACCOUNT_USER;
+
+            if(data.avatarResourceId) {
+                data.avatarUrl = `${this.options.baseUrl}/media/avatars/${data.avatarResourceId}`;
+            }
 
             return this.userRepository.save(data).then(() => {
                 return data;

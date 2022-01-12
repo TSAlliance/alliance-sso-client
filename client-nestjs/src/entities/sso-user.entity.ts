@@ -11,6 +11,8 @@ export class SSOUser extends SSOAccount {
     public username: string;
     public email: string;
     public accountType: AccountType = AccountType.ACCOUNT_USER;
+    public avatarResourceId: string;
+    public avatarUrl?: string;
     
     public role: SSORole;
 

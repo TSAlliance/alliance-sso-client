@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Post } from "@nestjs/common";
+import { Body, Controller, Get, Headers, Param, Post } from "@nestjs/common";
 import { SSOAccessToken, SSOCreateAuthorizationDTO } from "..";
 import { SSOUser } from "../entities/sso-user.entity";
 import { SSOService } from "../service/sso.service";
@@ -14,9 +14,9 @@ export class SSOController {
         return this.ssoService.authorize(createAuthorizationDto);
     }
 
-    @Get("user/@me")
-    public async findCurrentUser(@Headers("Authorization") authHeader: string): Promise<SSOUser> {
-        return this.ssoService.findCurrentUserByHeader(authHeader);
+    @Get("users/:userId")
+    public async findCurrentUser(@Headers("Authorization") authHeader: string, @Param("userId") userId: string): Promise<SSOUser> {
+        return this.ssoService.findUserUsingHeader(userId, authHeader);
     }
 
 }
