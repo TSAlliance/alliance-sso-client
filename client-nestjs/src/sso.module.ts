@@ -1,11 +1,10 @@
 import { Module, DynamicModule, Global } from '@nestjs/common';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { SSOUser } from '.';
 import { SSO_CONFIG_OPTIONS } from './constants';
 import { SSOController } from './controller/sso.controller';
 import { SSOAuthenticationGuard } from './guards/authentication.guard';
 import { SSOResponseInterceptor } from './interceptor/response.interceptor';
-import { SSOUserRepository } from './repositories/sso-user.repository';
 import { SSOService } from './service/sso.service';
 
 export class SSOConfigOptions {
@@ -50,7 +49,7 @@ export class SSOConfigOptions {
     /**
      * Enable or disabled built-in guard.
      */
-     public disableGuard?: boolean = false;
+    public disableGuard?: boolean = false;
 }
 
 @Global()
@@ -94,9 +93,6 @@ export class SSOModule {
             ],
             controllers: [
                 SSOController
-            ],
-            imports: [
-                TypeOrmModule.forFeature([ SSOUserRepository ])
             ]
         }
     }

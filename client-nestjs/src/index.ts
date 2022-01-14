@@ -9,8 +9,6 @@ export * from "./entities/sso-grant-code.entity";
 export * from "./entities/sso-user.entity";
 export * from "./entities/sso-role.entity";
 
-export * from "./repositories/sso-user.repository";
-
 export * from "./service/sso.service";
 
 export * from "./decorators/authentication.decorator";

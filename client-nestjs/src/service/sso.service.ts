@@ -7,7 +7,6 @@ import { SSOAccessToken } from "../entities/sso-access-token.entity";
 import { AccountType, SSOAppAccount } from "../entities/sso-account.entity";
 import { SSOGrantCode } from "../entities/sso-grant-code.entity";
 import { SSOUser } from "../entities/sso-user.entity";
-import { SSOUserRepository } from "../repositories/sso-user.repository";
 import { SSOConfigOptions } from "../sso.module";
 
 @Injectable()
@@ -21,9 +20,10 @@ export class SSOService {
 
     private _retryInterval: any;
 
+    private _onUserRecognizedEvent?: (user: SSOUser) => Promise<SSOUser>;
+
     constructor(
         @Inject(SSO_CONFIG_OPTIONS) private options: SSOConfigOptions, 
-        private userRepository: SSOUserRepository
     ) {
         this.logger.log(`Authenticating app with credentials at '${options.baseUrl}'`);
 
@@ -40,6 +40,10 @@ export class SSOService {
                 this.logger.log(`Authenticated at '${options.baseUrl}' as app '${this._currentAccount.title}'`);
             }
         })
+    }
+
+    public async registerOnUserRecognizedEvent(handler: (user: SSOUser) => Promise<SSOUser>) {
+        this._onUserRecognizedEvent = handler;
     }
 
     private async retryAuth() {
@@ -230,11 +234,12 @@ export class SSOService {
                 data.avatarUrl = `${this.options.baseUrl}/media/avatars/${data.avatarResourceId}`;
             }
 
-            return this.userRepository.save(data).then(() => {
-                return data;
+            if(!this._onUserRecognizedEvent) return data;
+            return this._onUserRecognizedEvent(data).then((result) => {
+                return result;
             }).catch((reason) => {
                 throw this.parseError(reason);
-            })
+            });
         }).catch((reason) => {
             throw this.parseError(reason);
         })
