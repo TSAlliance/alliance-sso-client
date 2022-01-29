@@ -176,11 +176,11 @@ export class SSOService {
         if(error.isAxiosError) {
             if(this.options.logging) this.logger.error(error.response)
             const message = error.response?.data["message"] || error.response?.statusText || error.message;
-            if(error.response.status == 401) {
+            if(error.response?.status == 401) {
                 return new UnauthorizedException(message);
-            } else if(error.response.status == 403) {
+            } else if(error.response?.status == 403) {
                 return new ForbiddenException(message);
-            } else if(error.response.status == 404) {
+            } else if(error.response?.status == 404) {
                 return new NotFoundException(message);
             } else {
                 return new BadRequestException(message);
